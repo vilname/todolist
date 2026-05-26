@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
     ports:
-      - "${DB_PORT:-5435}:5432"
+      - "5435:5432"
     command: >
       postgres
       -c max_connections=200
@@ -21,24 +21,27 @@ services:
     networks:
       - todolist-network
 
-  test:
-    image: maven:3.9.9-eclipse-temurin-17
-    working_dir: /app
-    volumes:
-      - .:/app
-      - ~/.m2:/root/.m2
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      db:
-        condition: service_healthy
+  db-test:
+    image: postgres:16-alpine
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-bank_rest}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-12345}
-      TESTCONTAINERS_RYUK_DISABLED: "true"
+      POSTGRES_DB: todolist_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    ports:
+      - "5436:5432"
+    command: >
+      postgres
+      -c max_connections=200
+      -c shared_buffers=256MB
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     networks:
       - todolist-network
-    command: mvn test
 
   app:
     build: .
@@ -57,6 +60,7 @@ services:
 
 volumes:
   postgres_data:
+  postgres_test_data:
 
 networks:
   todolist-network:

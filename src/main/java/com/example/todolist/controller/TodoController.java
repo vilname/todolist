@@ -3,6 +3,7 @@ package com.example.todolist.controller;
 import com.example.todolist.dto.TodoRequest;
 import com.example.todolist.dto.TodoResponse;
 import com.example.todolist.service.TodoService;
+import com.example.todolist.util.exeption.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -78,5 +79,11 @@ public class TodoController {
     @Operation(summary = "Search TODO items by title", description = "Searches TODO items by title (case-insensitive)")
     public ResponseEntity<List<TodoResponse>> searchTodos(@RequestParam String title) {
         return ResponseEntity.ok(todoService.searchTodos(title));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
