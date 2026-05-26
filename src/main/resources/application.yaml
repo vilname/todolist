@@ -4,5 +4,18 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/todolist
     driver-class-name: org.postgresql.Driver
-    username: your_username
-    password: your_password
+    username: postgres
+    password: 12345
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+    tagsSorter: alpha
+    try-it-out-enabled: true
+  show-actuator: false
+  packages-to-scan: com.example.todolist.controller
